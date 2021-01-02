@@ -3,9 +3,16 @@
 #include <png.h>
 #include <SDL2/SDL.h>
 
+static float convolution_kernel[3][3] = {
+    { 0.0275, 0.1102, 0.0275 },
+    { 0.1102, 0.4421, 0.1102 },
+    { 0.0275, 0.1102, 0.0275 },
+};
+
 int main(int argc, char *argv[]) {
 
     int width, height;
+    int **grayscale_data;
 
     FILE *fp;
     png_structp png_ptr;
@@ -45,6 +52,32 @@ int main(int argc, char *argv[]) {
     // read row data from png
     png_read_image(png_ptr, rows);
 
+    // allocate memory for grayscale image
+    grayscale_data = (int **) malloc(sizeof(int *) * height);
+    
+    // for each pixel now
+    for (int row_count = 0; row_count < height; row_count++)
+        grayscale_data[row_count] = (int *) malloc(sizeof(int) * width);
+
+    // convert image to grayscale for better edge detection
+    for (int row_count = 0; row_count < height; row_count++) {
+        for (int pixel_count = 0; pixel_count < width; pixel_count++) {
+            grayscale_data[row_count][pixel_count] = (
+                rows[row_count][pixel_count * 4] +
+                rows[row_count][pixel_count * 4 + 1] +
+                rows[row_count][pixel_count * 4 + 2]
+            ) / 3;
+        }
+    }
+
+    // free rows
+    for(int row_count = 0; row_count < height; row_count++) {
+        free(rows[row_count]);
+    }
+    free(rows);
+
+    // TODO: apply gaussian blur
+
     // initialize SDL
     SDL_Renderer *renderer;
     SDL_Window *window;
@@ -58,10 +91,14 @@ int main(int argc, char *argv[]) {
         for (int pixel_count = 0; pixel_count < width; pixel_count++) {
             SDL_SetRenderDrawColor(
                     renderer,
-                    rows[row_count][pixel_count * 4],
+                    /*rows[row_count][pixel_count * 4],
                     rows[row_count][pixel_count * 4 + 1],
                     rows[row_count][pixel_count * 4 + 2],
-                    rows[row_count][pixel_count * 4 + 3]
+                    rows[row_count][pixel_count * 4 + 3]*/
+                    grayscale_data[row_count][pixel_count],
+                    grayscale_data[row_count][pixel_count],
+                    grayscale_data[row_count][pixel_count],
+                    1
             );
             SDL_RenderDrawPoint(renderer, pixel_count, row_count);
         }
@@ -76,6 +113,12 @@ int main(int argc, char *argv[]) {
         if (SDL_PollEvent(&event) && event.type == SDL_QUIT)
             break;
     }
+
+    // free grayscale_data
+    for(int row_count = 0; row_count < height; row_count++) {
+        free(grayscale_data[row_count]);
+    }
+    free(grayscale_data);
 
     // exit SDL
     SDL_DestroyRenderer(renderer);
