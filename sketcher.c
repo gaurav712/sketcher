@@ -22,6 +22,30 @@ static int sobel_kernel_h[3][3] = {
     {  1,  2,  1 }
 };
 
+#define BLUR_CYCLES 5   // how many times the blur is applied
+
+void blur(int **grayscale_image_data, int image_height, int image_width) {
+
+    // for now, I am ignoring the 1 px wide edge to avoid weird conditions
+    for (int row_count = 1; row_count < (image_height - 1); row_count++) {
+        for (int pixel_count = 1; pixel_count < (image_width - 1); pixel_count++) {
+
+            grayscale_image_data[row_count][pixel_count] =
+                grayscale_image_data[row_count - 1][pixel_count - 1] * convolution_kernel[0][0] +
+                grayscale_image_data[row_count - 1][pixel_count] * convolution_kernel[0][1] +
+                grayscale_image_data[row_count - 1][pixel_count + 1] * convolution_kernel[0][2] +
+
+                grayscale_image_data[row_count][pixel_count - 1] * convolution_kernel[1][0] +
+                grayscale_image_data[row_count][pixel_count] * convolution_kernel[1][1] +
+                grayscale_image_data[row_count][pixel_count + 1] * convolution_kernel[1][2] +
+
+                grayscale_image_data[row_count + 1][pixel_count - 1] * convolution_kernel[2][0] +
+                grayscale_image_data[row_count + 1][pixel_count] * convolution_kernel[2][1] +
+                grayscale_image_data[row_count + 1][pixel_count + 1] * convolution_kernel[2][2];
+        }
+    }
+}
+
 int main(int argc, char *argv[]) {
 
     int width, height;
@@ -91,24 +115,8 @@ int main(int argc, char *argv[]) {
 
     // apply gaussian blur
 
-    // for now, I am ignoring the 1 px wide edge to avoid weird conditions
-    for (int row_count = 1; row_count < (height - 1); row_count++) {
-        for (int pixel_count = 1; pixel_count < (width - 1); pixel_count++) {
-
-            grayscale_data[row_count][pixel_count] =
-                grayscale_data[row_count - 1][pixel_count - 1] * convolution_kernel[0][0] +
-                grayscale_data[row_count - 1][pixel_count] * convolution_kernel[0][1] +
-                grayscale_data[row_count - 1][pixel_count + 1] * convolution_kernel[0][2] +
-
-                grayscale_data[row_count][pixel_count - 1] * convolution_kernel[1][0] +
-                grayscale_data[row_count][pixel_count] * convolution_kernel[1][1] +
-                grayscale_data[row_count][pixel_count + 1] * convolution_kernel[1][2] +
-
-                grayscale_data[row_count + 1][pixel_count - 1] * convolution_kernel[2][0] +
-                grayscale_data[row_count + 1][pixel_count] * convolution_kernel[2][1] +
-                grayscale_data[row_count + 1][pixel_count + 1] * convolution_kernel[2][2];
-        }
-    }
+    for(int blur_cycle = 0; blur_cycle < BLUR_CYCLES; blur_cycle++)
+        blur(grayscale_data, height, width);
 
     // allocate memory for sketch
     sketch_data = (int **) malloc(sizeof(int *) * height);
