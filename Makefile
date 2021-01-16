@@ -2,8 +2,8 @@ CC=gcc
 CFLAGS=-Wall
 LIBS=-lpng -lSDL2 -lm
 
-image_test: image_test.c
-	$(CC) $(CFLAGS) -o image_test image_test.c $(LIBS)
+sketcher: sketcher.c
+	$(CC) $(CFLAGS) -o sketcher sketcher.c $(LIBS)
 
 clean:
-	rm -f image_test
+	rm -f sketcher

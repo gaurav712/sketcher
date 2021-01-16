@@ -191,6 +191,12 @@ int main(int argc, char *argv[]) {
     }
     free(grayscale_data);
 
+    // free sketch_data
+    for(int row_count = 0; row_count < height; row_count++) {
+        free(sketch_data[row_count]);
+    }
+    free(sketch_data);
+
     // exit SDL
     SDL_DestroyRenderer(renderer);
     SDL_DestroyWindow(window);
