@@ -1,18 +1,31 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <png.h>
+#include <math.h>
 #include <SDL2/SDL.h>
 
 static float convolution_kernel[3][3] = {
     { 0.0275, 0.1102, 0.0275 },
     { 0.1102, 0.4421, 0.1102 },
-    { 0.0275, 0.1102, 0.0275 },
+    { 0.0275, 0.1102, 0.0275 }
+};
+
+static int sobel_kernel_v[3][3] = {
+    { -1, 0, 1 },
+    { -2, 0, 2 },
+    { -1, 0, 1 }
+};
+
+static int sobel_kernel_h[3][3] = {
+    { -1, -2, -1 },
+    {  0,  0,  0 },
+    {  1,  2,  1 }
 };
 
 int main(int argc, char *argv[]) {
 
     int width, height;
-    int **grayscale_data;
+    int **grayscale_data, **sketch_data;
 
     FILE *fp;
     png_structp png_ptr;
@@ -81,6 +94,7 @@ int main(int argc, char *argv[]) {
     // for now, I am ignoring the 1 px wide edge to avoid weird conditions
     for (int row_count = 1; row_count < (height - 1); row_count++) {
         for (int pixel_count = 1; pixel_count < (width - 1); pixel_count++) {
+
             grayscale_data[row_count][pixel_count] =
                 grayscale_data[row_count - 1][pixel_count - 1] * convolution_kernel[0][0] +
                 grayscale_data[row_count - 1][pixel_count] * convolution_kernel[0][1] +
@@ -96,27 +110,48 @@ int main(int argc, char *argv[]) {
         }
     }
 
-/*  TODO: MAKE IT DYNAMIC
-    for (int row_count = 0; row_count < height; row_count++) {
-        for (int pixel_count = 0; pixel_count < width; pixel_count++) {
+    // allocate memory for sketch
+    sketch_data = (int **) malloc(sizeof(int *) * height);
 
-            if(!row_count) {    // it's on the top edge
-                if (!pixel_count) {  // it's on top left corner
-                } else if(pixel_count == (width - 1)) { // it's on top right corner
-                } else {    // somewhere between top two corners
-                }
-            } else if(row_count == (height - 1)) { // it's on the bottom edge
-                if(!pixel_count) {  // it's on bottom left corner
-                } else if(pixel_count == (width - 1)) { // it's on bottom right corner
-                } else {    // somewhere between bottom two corners
-                }
-            } else if(!pixel_count) {   // it's on the left edge
-            } else if(pixel_count == (width - 1)) { // it's on the left edge
-            } else {    // somewhere in the middle
-            }
+    // for each pixel now
+    for (int row_count = 0; row_count < height; row_count++)
+        sketch_data[row_count] = (int *) malloc(sizeof(int) * width);
+
+    // apply sobel edge detection to find the edges
+
+    for (int row_count = 1; row_count < (height - 1); row_count++) {
+        for (int pixel_count = 1; pixel_count < (width - 1); pixel_count++) {
+
+            sketch_data[row_count][pixel_count] = sqrt(
+                pow(
+                    grayscale_data[row_count - 1][pixel_count - 1] * sobel_kernel_v[0][0] +
+                    grayscale_data[row_count - 1][pixel_count] * sobel_kernel_v[0][1] +
+                    grayscale_data[row_count - 1][pixel_count + 1] * sobel_kernel_v[0][2] +
+
+                    grayscale_data[row_count][pixel_count - 1] * sobel_kernel_v[1][0] +
+                    grayscale_data[row_count][pixel_count] * sobel_kernel_v[1][1] +
+                    grayscale_data[row_count][pixel_count + 1] * sobel_kernel_v[1][2] +
+                    
+                    grayscale_data[row_count + 1][pixel_count - 1] * sobel_kernel_v[2][0] +
+                    grayscale_data[row_count + 1][pixel_count] * sobel_kernel_v[2][1] +
+                    grayscale_data[row_count + 1][pixel_count + 1] * sobel_kernel_v[2][2]
+                , 2) +
+                pow(
+                    grayscale_data[row_count - 1][pixel_count - 1] * sobel_kernel_h[0][0] +
+                    grayscale_data[row_count - 1][pixel_count] * sobel_kernel_h[0][1] +
+                    grayscale_data[row_count - 1][pixel_count + 1] * sobel_kernel_h[0][2] +
+
+                    grayscale_data[row_count][pixel_count - 1] * sobel_kernel_h[1][0] +
+                    grayscale_data[row_count][pixel_count] * sobel_kernel_h[1][1] +
+                    grayscale_data[row_count][pixel_count + 1] * sobel_kernel_h[1][2] +
+                    
+                    grayscale_data[row_count + 1][pixel_count - 1] * sobel_kernel_h[2][0] +
+                    grayscale_data[row_count + 1][pixel_count] * sobel_kernel_h[2][1] +
+                    grayscale_data[row_count + 1][pixel_count + 1] * sobel_kernel_h[2][2]
+                , 2)
+            );
         }
     }
-*/
 
     // initialize SDL
     SDL_Renderer *renderer;
@@ -131,9 +166,9 @@ int main(int argc, char *argv[]) {
         for (int pixel_count = 0; pixel_count < width; pixel_count++) {
             SDL_SetRenderDrawColor(
                     renderer,
-                    grayscale_data[row_count][pixel_count],
-                    grayscale_data[row_count][pixel_count],
-                    grayscale_data[row_count][pixel_count],
+                    sketch_data[row_count][pixel_count],
+                    sketch_data[row_count][pixel_count],
+                    sketch_data[row_count][pixel_count],
                     1
                     );
             SDL_RenderDrawPoint(renderer, pixel_count, row_count);
