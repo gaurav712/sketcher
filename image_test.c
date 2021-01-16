@@ -54,7 +54,7 @@ int main(int argc, char *argv[]) {
 
     // allocate memory for grayscale image
     grayscale_data = (int **) malloc(sizeof(int *) * height);
-    
+
     // for each pixel now
     for (int row_count = 0; row_count < height; row_count++)
         grayscale_data[row_count] = (int *) malloc(sizeof(int) * width);
@@ -63,10 +63,10 @@ int main(int argc, char *argv[]) {
     for (int row_count = 0; row_count < height; row_count++) {
         for (int pixel_count = 0; pixel_count < width; pixel_count++) {
             grayscale_data[row_count][pixel_count] = (
-                rows[row_count][pixel_count * 4] +
-                rows[row_count][pixel_count * 4 + 1] +
-                rows[row_count][pixel_count * 4 + 2]
-            ) / 3;
+                    rows[row_count][pixel_count * 4] +
+                    rows[row_count][pixel_count * 4 + 1] +
+                    rows[row_count][pixel_count * 4 + 2]
+                    ) / 3;
         }
     }
 
@@ -76,7 +76,47 @@ int main(int argc, char *argv[]) {
     }
     free(rows);
 
-    // TODO: apply gaussian blur
+    // apply gaussian blur
+
+    // for now, I am ignoring the 1 px wide edge to avoid weird conditions
+    for (int row_count = 1; row_count < (height - 1); row_count++) {
+        for (int pixel_count = 1; pixel_count < (width - 1); pixel_count++) {
+            grayscale_data[row_count][pixel_count] =
+                grayscale_data[row_count - 1][pixel_count - 1] * convolution_kernel[0][0] +
+                grayscale_data[row_count - 1][pixel_count] * convolution_kernel[0][1] +
+                grayscale_data[row_count - 1][pixel_count + 1] * convolution_kernel[0][2] +
+
+                grayscale_data[row_count][pixel_count - 1] * convolution_kernel[1][0] +
+                grayscale_data[row_count][pixel_count] * convolution_kernel[1][1] +
+                grayscale_data[row_count][pixel_count + 1] * convolution_kernel[1][2] +
+
+                grayscale_data[row_count + 1][pixel_count - 1] * convolution_kernel[2][0] +
+                grayscale_data[row_count + 1][pixel_count] * convolution_kernel[2][1] +
+                grayscale_data[row_count + 1][pixel_count + 1] * convolution_kernel[2][2];
+        }
+    }
+
+/*  TODO: MAKE IT DYNAMIC
+    for (int row_count = 0; row_count < height; row_count++) {
+        for (int pixel_count = 0; pixel_count < width; pixel_count++) {
+
+            if(!row_count) {    // it's on the top edge
+                if (!pixel_count) {  // it's on top left corner
+                } else if(pixel_count == (width - 1)) { // it's on top right corner
+                } else {    // somewhere between top two corners
+                }
+            } else if(row_count == (height - 1)) { // it's on the bottom edge
+                if(!pixel_count) {  // it's on bottom left corner
+                } else if(pixel_count == (width - 1)) { // it's on bottom right corner
+                } else {    // somewhere between bottom two corners
+                }
+            } else if(!pixel_count) {   // it's on the left edge
+            } else if(pixel_count == (width - 1)) { // it's on the left edge
+            } else {    // somewhere in the middle
+            }
+        }
+    }
+*/
 
     // initialize SDL
     SDL_Renderer *renderer;
@@ -91,15 +131,11 @@ int main(int argc, char *argv[]) {
         for (int pixel_count = 0; pixel_count < width; pixel_count++) {
             SDL_SetRenderDrawColor(
                     renderer,
-                    /*rows[row_count][pixel_count * 4],
-                    rows[row_count][pixel_count * 4 + 1],
-                    rows[row_count][pixel_count * 4 + 2],
-                    rows[row_count][pixel_count * 4 + 3]*/
                     grayscale_data[row_count][pixel_count],
                     grayscale_data[row_count][pixel_count],
                     grayscale_data[row_count][pixel_count],
                     1
-            );
+                    );
             SDL_RenderDrawPoint(renderer, pixel_count, row_count);
         }
     }
