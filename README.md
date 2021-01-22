@@ -8,7 +8,7 @@ program to convert images to sketch
 * `TODO`
 
 # NOTES
-* works only with `\*.png` images (for now)
+* works only with `*.png` images (for now)
 
 # LICENSE
 Licensed under `MIT License`
