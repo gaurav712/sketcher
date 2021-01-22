@@ -1,3 +1,8 @@
+/*
+ * Copyright (c) 2021 Gaurav Kumar Yadav
+ * Licensed under MIT License
+ */
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <png.h>
