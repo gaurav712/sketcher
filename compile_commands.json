@@ -1,0 +1,47 @@
+[
+  {
+    "arguments": [
+      "/usr/bin/gcc",
+      "-Wall",
+      "-I",
+      "/opt/homebrew/include",
+      "-c",
+      "-o",
+      "build/main.o",
+      "src/main.c"
+    ],
+    "directory": "/Users/gaurav/Projects/sketcher",
+    "file": "/Users/gaurav/Projects/sketcher/src/main.c",
+    "output": "/Users/gaurav/Projects/sketcher/build/main.o"
+  },
+  {
+    "arguments": [
+      "/usr/bin/gcc",
+      "-Wall",
+      "-I",
+      "/opt/homebrew/include",
+      "-c",
+      "-o",
+      "build/image_operations.o",
+      "src/image_operations.c"
+    ],
+    "directory": "/Users/gaurav/Projects/sketcher",
+    "file": "/Users/gaurav/Projects/sketcher/src/image_operations.c",
+    "output": "/Users/gaurav/Projects/sketcher/build/image_operations.o"
+  },
+  {
+    "arguments": [
+      "/usr/bin/gcc",
+      "-Wall",
+      "-I",
+      "/opt/homebrew/include",
+      "-c",
+      "-o",
+      "build/utils.o",
+      "src/utils.c"
+    ],
+    "directory": "/Users/gaurav/Projects/sketcher",
+    "file": "/Users/gaurav/Projects/sketcher/src/utils.c",
+    "output": "/Users/gaurav/Projects/sketcher/build/utils.o"
+  }
+]
