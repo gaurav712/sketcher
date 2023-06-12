@@ -13,4 +13,4 @@ program to convert images to sketch
 
 Licensed under `MIT License`
 
-`Copyright (c) 2023 Gaurav Kumar Yadav`
+`Copyright (c) 2021 Gaurav Kumar Yadav`
