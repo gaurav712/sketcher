@@ -1,3 +1,5 @@
+> **Note:** This project is moved to Codeberg: https://codeberg.org/gaurav712/sketcher
+
 # sketcher
 
 program to convert images to sketch
